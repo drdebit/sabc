@@ -1,0 +1,5 @@
+.wrapdiv
+{
+    inline-size: 150px;
+    display: inline-block;
+}

@@ -63,7 +63,7 @@
 
 (defn game-time []
   [:div [:h1 title]
-   [:p (:text @comm/location)]
+   [:p {:style {:width "50%"}} (:text @comm/location)]
    [:div (map choice-button (:parents @comm/location))]
    [:div (map choice-button (:children @comm/location))]
    [:div [:p [:input {:type "button" :value "New Game"  :on-click #(comm/new-game)}]]]

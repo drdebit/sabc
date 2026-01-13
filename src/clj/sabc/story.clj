@@ -16,15 +16,19 @@
                       :links [:initYes :initNo]}
                :initYes {:choose-text "Of course, Don, right away."
                          :text [:div [:p "\"Excellent!\" The Don comes around the desk and claps you on the back, causing you to almost bite your tongue. \"Keep me in the loop. Happy hunting.\""]]
-                         :links [:stepFirst]
+                         :links [:sofiaBriefing]
                          :tf {:init {:return-text "Talk to the boss again."
                                               :text "What do you want?"}
                                        :initYes {:choose-text "Nevermind."}}}
                :initNo {:choose-text "I think maybe you have the wrong guy."
                         :text [:div [:p "The Don's glare turns steely. \"Think again.\""]]}
-               :stepFirst {:choose-text "Here we go!"
-                           :text [:div [:p "If you're going to find out who's stealing from the Don, you're going to need to know a thing or two about how Consolidated Paesan keeps its records. This is a balance sheet:"]]
-                           :table {}}})
+               :sofiaBriefing {:choose-text "Let's get to work."
+                               :text [:div
+                                      [:p "Sofia leads you to a small office down the hall. She closes the door and turns to face you, pushing her spectacles up her nose."]
+                                      [:p "\"Okay, here's the situation,\" she says, pulling out a thick folder. \"Someone at Consolidated Paesan has been cooking the books. The Don noticed a $50,000 discrepancy in the quarterly materials budget.\""]
+                                      [:p "She spreads several documents across the desk. \"I've narrowed it down to a few suspects in different departments. To figure out who's behind this, we'll need to dig into their financial records and look for inconsistencies.\""]
+                                      [:p "Sofia looks at you over her glasses. \"I hope you know your way around a ledger. We're going to need to analyze costs, check calculations, and follow the money. Ready to start the investigation?\""]]}})
+
 
 (defn datomize-entries [m]
   (mapv (fn [[k v]] (into {} (filter val {:story/tag k

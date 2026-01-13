@@ -13,7 +13,14 @@
            :location nil
            :add-user-response nil
            :error nil
-           :loading false}))
+           :loading false
+           ;; Mystery game state
+           :game-mode :story  ; :story or :mystery
+           :cases nil
+           :progress nil
+           :current-game nil
+           :current-clue nil
+           :accusation-result nil}))
 
 ;; State accessors for convenience
 (defn get-state [k] (get @app-state k))
@@ -89,3 +96,126 @@
           (set-state! :location (:body response))
           (:body response))
         (handle-error response "new game")))))
+
+;; Mystery Game API functions
+
+(declare get-game-status)
+
+(defn get-cases []
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/get (api-url (str "/cases/" user))
+                                 (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (let [body (:body response)]
+          (set-state! :cases (:cases body))
+          (set-state! :progress (:progress body))
+          body)
+        (handle-error response "get cases")))))
+
+(defn start-case [case-id]
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/post (api-url (str "/case/" user "/" (name case-id)))
+                                  (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (do
+          (set-state! :current-game (:body response))
+          (set-state! :current-clue nil)
+          (set-state! :accusation-result nil)
+          ;; Immediately fetch game status
+          (<! (get-game-status))
+          (:body response))
+        (handle-error response "start case")))))
+
+(defn get-game-status []
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/get (api-url (str "/game/" user "/status"))
+                                 (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (do
+          (set-state! :current-game (:body response))
+          (:body response))
+        (handle-error response "get game status")))))
+
+(defn get-clue [clue-id]
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/get (api-url (str "/game/" user "/clue/" (name clue-id)))
+                                 (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (do
+          (set-state! :current-clue (:body response))
+          (:body response))
+        (handle-error response "get clue")))))
+
+(defn get-hint [clue-id]
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/get (api-url (str "/game/" user "/clue/" (name clue-id) "/hint"))
+                                 (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (:hint (:body response))
+        (handle-error response "get hint")))))
+
+(defn solve-clue [clue-id answer-index]
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/post (api-url (str "/game/" user "/clue/" (name clue-id) "/solve"))
+                                  (with-auth {:with-credentials? false
+                                              :json-params {:answer answer-index}})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (let [result (:body response)]
+          ;; Update game status after solving
+          (<! (get-game-status))
+          result)
+        (handle-error response "solve clue")))))
+
+(defn make-accusation [suspect-id]
+  (go
+    (set-state! :loading true)
+    (clear-error!)
+    (let [user (get-state :user)
+          response (<! (http/post (api-url (str "/game/" user "/accuse/" (name suspect-id)))
+                                  (with-auth {:with-credentials? false})))]
+      (set-state! :loading false)
+      (if (success? response)
+        (do
+          (set-state! :accusation-result (:body response))
+          (:body response))
+        (handle-error response "make accusation")))))
+
+(defn start-investigation []
+  "Starts the mystery investigation directly with the first available case."
+  (set-state! :game-mode :mystery)
+  (set-state! :current-game nil)
+  (set-state! :current-clue nil)
+  (set-state! :accusation-result nil)
+  ;; Start the first case directly
+  (start-case :missing-materials))
+
+(defn back-to-story []
+  "Returns to story mode."
+  (set-state! :game-mode :story)
+  (set-state! :current-game nil)
+  (set-state! :current-clue nil)
+  (set-state! :accusation-result nil))

@@ -1,5 +1,6 @@
 (ns sabc.schema
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [sabc.db :as db]))
 
 (def schema [;; Users
              {:db/ident :user/email
@@ -64,11 +65,10 @@
               :db/cardinality :db.cardinality/one
               :db/doc "Reference to the story entry at which the player currently is."}])
 
+(defonce schema-installed? (atom false))
 
-;; Create and connect to database
-(def db-uri "datomic:mem://sabc-db")
-(d/create-database db-uri)
-(def conn (d/connect db-uri))
-
-;; Add schema
-@(d/transact conn schema)
+(defn install-schema! []
+  "Installs the schema if not already installed."
+  (when-not @schema-installed?
+    @(d/transact (db/conn) schema)
+    (reset! schema-installed? true)))

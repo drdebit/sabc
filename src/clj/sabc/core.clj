@@ -1,38 +1,34 @@
 (ns sabc.core
   (:gen-class)
-  (:require [datomic.api :as d]
+  (:require [clojure.tools.logging :as log]
+            [sabc.config :as config]
+            [sabc.schema :as schema]
+            [sabc.story :as story]
             [sabc.rest :as rest]))
-
-(def test-player {:name "player1"
-                  :inventory #{:socks :sneakers}
-                  :cooldude true})
-
-(defn current-player []
-  test-player)
-
-(def can-do {:walk {:s "walk"
-                    :r ['(true? (get (current-player) :cooldude))]}
-             :run {:s "run!"
-                   :r ['(contains? (get (current-player) :inventory) :sneakers)]}})
-
-(defn check-restrictions [p a]
-  (every? identity (map eval (get-in can-do [a :r]))))
 
 (defonce server (atom nil))
 
+(defn init-db! []
+  "Initialize database with schema and story data."
+  (log/info "Initializing database...")
+  (schema/install-schema!)
+  (story/load-story!)
+  (log/info "Database initialized."))
+
 (defn start []
   (when-not @server
+    (init-db!)
     (reset! server (rest/start-server))
-    (println "Server started on port 5000")))
+    (log/info "Server started on port" config/port)))
 
 (defn stop []
   (when @server
     (rest/stop-server @server)
     (reset! server nil)
-    (println "Server stopped")))
+    (log/info "Server stopped")))
 
 (defn -main
   "Start the SABC server."
   [& args]
   (start)
-  (println "SABC server running. Press Ctrl+C to stop."))
+  (log/info "SABC server running. Press Ctrl+C to stop."))

@@ -1,19 +1,10 @@
 (ns sabc.story
   (:require [datomic.api :as d]
-            [hiccup.core :as h]
-            [clojure.spec.alpha :as spec]
-            [sabc.structure :as structure]))
-
-;; Datomic
-(def db-uri "datomic:mem://sabc-db")
-(def conn (d/connect db-uri))
+            [sabc.db :as db]))
 
 ;; Utilities
 (defn read-structure [s]
   (when (not (empty? s)) (read-string s)))
-
-;; Spec
-(spec/def :game/entry-transformation (spec/and string? #(map? (read-string %))))
 
 ;; Data
 (def text-map {:init {:return-text "Think again."
@@ -50,8 +41,14 @@
                   (mapv (fn [c] {:db/id [:story/tag k]
                                   :story/child {:db/id [:story/tag c]}}) links))) m)))
 
-@(d/transact conn (datomize-entries text-map))
-@(d/transact conn (link-entries text-map))
+(defonce story-loaded? (atom false))
+
+(defn load-story! []
+  "Loads story data into the database if not already loaded."
+  (when-not @story-loaded?
+    @(d/transact (db/conn) (datomize-entries text-map))
+    @(d/transact (db/conn) (link-entries text-map))
+    (reset! story-loaded? true)))
 
 (defn child-list [k]
   (->> (d/q '[:find ?tagc ?ctext
@@ -60,7 +57,7 @@
               [?e :story/child ?child]
               [?child :story/tag ?tagc]
               [?child :story/choose-text ?ctext]]
-            (d/db conn) k)
+            (db/db) k)
        (apply vector)
        (mapv (fn [[k v]] {k {:choose-text v}}))))
 
@@ -71,7 +68,7 @@
               [?e :story/child ?child]
               [?child :story/tag ?tagc]
               [?e :story/return-text ?rtext]]
-            (d/db conn) k)
+            (db/db) k)
        (apply vector)
        (mapv (fn [[k v]] {k {:return-text v}}))))
 
@@ -80,7 +77,7 @@
                        :in $ ?tag
                        :where [?e :story/tag ?tag]
                        [?e :story/entry-transformations ?tf]]
-                     (d/db conn) k)
+                     (db/db) k)
                 first
                 (apply read-structure))]
     (cond
@@ -98,7 +95,7 @@
               :in $ ?tag
               :where [?e :story/tag ?tag]
               [?e :story/text ?text]]
-            (d/db conn) k)
+            (db/db) k)
        first
        (apply read-structure)
        (hash-map :text)

@@ -11,13 +11,17 @@
         ;; Backend - Database
         com.datomic/datomic-pro {:mvn/version "1.0.6711"}
 
+        ;; Backend - JSON
+        cheshire/cheshire {:mvn/version "5.12.0"}
+
         ;; Backend - Utilities
+        org.clojure/tools.logging {:mvn/version "1.2.4"}
         org.slf4j/slf4j-simple {:mvn/version "1.7.32"}
         environ/environ {:mvn/version "1.2.0"}
-        hiccup/hiccup {:mvn/version "1.0.5"}
 
         ;; ClojureScript (for shadow-cljs :deps true)
         org.clojure/clojurescript {:mvn/version "1.11.60"}
+        thheller/shadow-cljs {:mvn/version "2.26.0"}
         reagent/reagent {:mvn/version "1.2.0"}
         cljs-http/cljs-http {:mvn/version "0.1.46"}}
 

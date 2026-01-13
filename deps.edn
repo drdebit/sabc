@@ -1,0 +1,30 @@
+{:paths ["src/clj" "src/cljs" "resources"]
+
+ :deps {;; Clojure
+        org.clojure/clojure {:mvn/version "1.11.1"}
+
+        ;; Backend - Web server
+        io.pedestal/pedestal.service {:mvn/version "0.5.9"}
+        io.pedestal/pedestal.route {:mvn/version "0.5.9"}
+        io.pedestal/pedestal.immutant {:mvn/version "0.5.9"}
+
+        ;; Backend - Database
+        com.datomic/datomic-pro {:mvn/version "1.0.6711"}
+
+        ;; Backend - Utilities
+        org.slf4j/slf4j-simple {:mvn/version "1.7.32"}
+        environ/environ {:mvn/version "1.2.0"}
+        hiccup/hiccup {:mvn/version "1.0.5"}
+
+        ;; ClojureScript (for shadow-cljs :deps true)
+        org.clojure/clojurescript {:mvn/version "1.11.60"}
+        reagent/reagent {:mvn/version "1.2.0"}
+        cljs-http/cljs-http {:mvn/version "0.1.46"}}
+
+ :aliases
+ {:dev {:extra-paths ["dev"]}
+
+  :run {:main-opts ["-m" "sabc.core"]}
+
+  :repl {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}
+                      cider/cider-nrepl {:mvn/version "0.30.0"}}}}}

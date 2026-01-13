@@ -1,16 +1,19 @@
 {
+  "name": "sabc",
+  "version": "1.0.0",
+  "description": "Consolidated Paesan - A choose your own adventure game",
+  "private": true,
+  "scripts": {
+    "dev": "shadow-cljs watch app",
+    "release": "shadow-cljs release app",
+    "server": "shadow-cljs server",
+    "clean": "rm -rf public/js .shadow-cljs"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^2.26.0"
+  },
   "dependencies": {
-    "create-react-class": "^15.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  },
-  "name": "matt",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  }
 }

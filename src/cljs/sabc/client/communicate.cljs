@@ -1,8 +1,8 @@
-(ns dana.communicate
+(ns sabc.client.communicate
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require  [cljs-http.client :as http]
-             [cljs.core.async :refer [<!]]
-             [reagent.core :as r]))
+  (:require [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]
+            [reagent.core :as r]))
 
 (defonce greet-string (r/atom ""))
 (defonce user (r/atom ""))
@@ -21,7 +21,6 @@
                                         (cond (empty? loc) "" :else (str "/" loc)))
                                    {:with-credentials? false}))]
         (prn (:status response))
-        ;; (prn (:body response))
         (reset! location (:body response))
         (:body response))))
 

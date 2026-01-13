@@ -1,11 +1,9 @@
-(ns dana.app
-  (:require ;[goog.dom :as gdom]
-            ;[goog.events :as gevents]
-   [dana.communicate :as comm]
-   ["react" :as react]
-   [reagent.core :as r]
-   [reagent.dom :as rdom]
-   [reagent.dom.client :as rdomc]))
+(ns sabc.client.app
+  (:require [sabc.client.communicate :as comm]
+            ["react" :as react]
+            [reagent.core :as r]
+            [reagent.dom :as rdom]
+            [reagent.dom.client :as rdomc]))
 
 (defonce pin (r/atom false))
 (def title "Consolidated Paesan")
@@ -29,14 +27,6 @@
                           (comm/add-user @typed-user))}
       [atom-input typed-user]
       [:button {:type :submit} "Submit"]]]))
-
-;; (defn username-form []
-;;   (let [typed-user (r/atom "")]
-;;     [:div#username-form [:h1 "I am a game!"]
-;;      [:p "Please type your CampusID in the box below."]
-;;      [atom-input typed-user]
-;;      [:input {:type "button" :value "Submit"
-;;               :on-click #(comm/add-user @typed-user)}]]))
 
 (defn provide-pin []
   [:div [:h1 "Please write down your PIN so you can access your game in the future."]
@@ -66,8 +56,7 @@
    [:p {:style {:width "50%"}} (:text @comm/location)]
    [:div (map choice-button (:parents @comm/location))]
    [:div (map choice-button (:children @comm/location))]
-   [:div [:p [:input {:type "button" :value "New Game"  :on-click #(comm/new-game)}]]]
-   ])
+   [:div [:p [:input {:type "button" :value "New Game"  :on-click #(comm/new-game)}]]]])
 
 (defn app []
   (cond
@@ -79,6 +68,7 @@
    :else [game-time]))
 
 (defonce root (rdomc/create-root (.getElementById js/document "root")))
+
 (defn init []
   (.render root (r/as-element [app])))
 
@@ -87,28 +77,3 @@
 
 (defn ^:dev/after-load re-render []
   (init))
-
-;; define your app data so that it doesn't get over-written on reload
-;; (defn get-app-element []
-;;   (gdom/getElement "root"))
-;; (def app-element (get-app-element))
-;; (def input (gdom/getElement "input"))
-
-;; (defn get-input-value []
-;;   (js/String (.. input -value)))
-
-;; (def input-value (gdom/getElement "input-value"))
-;; (defn render-new-value [val] 
-;;   (gdom/setTextContent input-value val))
-
-;; (defonce is-initialized?
-;;   (do
-;;     (gevents/listen app-element "click"
-;;                     (fn [event]
-;;                       (condp = (aget event "target" "id")
-;;                         "submit" (comm/greeting)
-;;                         nil)))
-;;     (add-watch comm/greet-string :counter-watcher 
-;;       (fn [key atom old new]
-;;         (render-new-value new)))
-;;     true))
